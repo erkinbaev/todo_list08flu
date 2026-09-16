@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list08flu/home/home_cubit.dart';
 import 'package:todo_list08flu/home/home_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+   MyApp({super.key});
+  HomeCubit _cubit = HomeCubit();
 
   // This widget is the root of your application.
   @override
@@ -16,7 +19,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: BlocProvider(
+        create: (_) => _cubit,
+        child: MyHomePage(cubit: _cubit),
+        ),
     );
   }
 }

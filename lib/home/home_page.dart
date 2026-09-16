@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list08flu/add/add_page.dart';
 import 'dart:math';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todo_list08flu/database/todo.dart';
+import 'package:todo_list08flu/home/home_cubit.dart';
+import 'package:todo_list08flu/home/home_state.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  final HomeCubit cubit;
 
-  final String title;
+  const MyHomePage({super.key, required this.cubit});
 
   @override
   //Выделяет память для виджета с состоянием
@@ -13,21 +17,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> tasks = [];
-  int _counter = 0;
-  bool _isTextVisible = true;
-  Color _containerColor = Colors.blue;
-  List<Color> _colors = [Colors.blue, Colors.red, Colors.green, Colors.orange];
-  int _price = 0;
-  int _amount = 0;
-
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
+  List<Todo> _todoList = [];
+  late HomeCubit _cubit;
+  
 //занимает память, то есть в этот момент виджет появляется в оперативной памяти
   @override
   void initState() {
@@ -37,6 +29,8 @@ class _MyHomePageState extends State<MyHomePage> {
     //инициализируем свойства
     //запускать анимации, либо таймеры
     print("MyHomePage initState");
+    _cubit = widget.cubit;
+    _todoList = _cubit.getTodoList();
   }
 
 //рисует интерфейс
@@ -74,19 +68,29 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text("Мои задачи"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: .center,
-          children: [
-            Visibility(child:  Text("Дополнительная информация"), visible: _isTextVisible),
-            Container(width: 300, height: 200, color: _containerColor),
-            TextButton(onPressed: onHideTap, child: Text(_isTextVisible ? "Скрыть" : "Показать")),
-            Text("Цена: $_price сом"),
-            Row(children: [Spacer(), IconButton(onPressed: onMinusTap, icon: Icon(Icons.remove)),IconButton(onPressed: onPlusTap, icon: Icon(Icons.add)), Spacer()])
-          ],
-        ),
+      body: BlocBuilder<HomeCubit, HomeState>(
+        builder: (context, state) {
+          if (state.status == .empty) {
+            return const Center(
+              child: Text("У вас еще нет задач! Добавьте первую задачу."),
+            );
+          } else if (state.status ==.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            return Center(
+              child: ListView.builder(
+                itemCount: _todoList.length,
+                itemBuilder: (context, index) {
+                  return ListTile(title: Text(_todoList[index].title));
+                }
+                ),
+            );
+          }
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: onAddTap,
@@ -103,33 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
      // tasks.insert(0, result);
     }
   }
-
-  void onHideTap() {
-    setState(() {
-      _isTextVisible = !_isTextVisible;
-      _containerColor = _colors[Random().nextInt(_colors.length)];
-    });
-    print(_isTextVisible);
-  }
-
-  void onPlusTap() {
-    setState(() {
-       _amount ++;
-      _price = 200 * _amount;
-    });
-    print(_amount);
-    print(_price);
-  }
-
-  void onMinusTap() {
-    setState(() {
-      _amount --;
-      _price = 200 * _amount;
-    });
-    print(_amount);
-    print(_price);
-  }
-
+  
 //уничтожает виджет из памяти (освобождает)
   @override
   void dispose() {

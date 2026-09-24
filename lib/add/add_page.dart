@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list08flu/database/todo.dart';
 import 'dart:async';
+
+import 'package:todo_list08flu/main.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -56,6 +59,10 @@ TextEditingController _textEditingController = TextEditingController();
   }
 
   void onSaveTap() {
+    final title = _textEditingController.text;
+    final createdAt = DateTime.now().toString();
+    appDatabase.addTodo(Todo(id: 1, title: title, createdAt: createdAt, isDone: false));
+
     Navigator.of(context).pop(_textEditingController.text);
   }
 

@@ -5,11 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_list08flu/database/todo.dart';
 import 'package:todo_list08flu/home/home_cubit.dart';
 import 'package:todo_list08flu/home/home_state.dart';
+import 'package:todo_list08flu/settings/settings_page.dart';
 
 class MyHomePage extends StatefulWidget {
   final HomeCubit cubit;
+  final bool isDarkTheme;
+  final Function(bool) onThemeChanged;
 
-  const MyHomePage({super.key, required this.cubit});
+  const MyHomePage({super.key, required this.cubit, required this.isDarkTheme, required this.onThemeChanged});
 
   @override
   //Выделяет память для виджета с состоянием
@@ -69,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("Мои задачи"),
+        actions: [IconButton(onPressed: _onSettingsTap, icon: Icon(Icons.settings))],
       ),
       body: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
@@ -102,10 +106,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void onAddTap() async {
     final result = await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddPage()));
-    if (result != null) {
-      print("$result");
-     // tasks.insert(0, result);
-    }
+    _cubit.getTodoList();
+  }
+
+  void _onSettingsTap() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => SettingsPage(isDarkTheme: widget.isDarkTheme, onThemeChanged: widget.onThemeChanged)));
   }
   
 //уничтожает виджет из памяти (освобождает)
